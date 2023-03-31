@@ -11,6 +11,15 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+const generateRandomStr = function() {
+  const alphaNum = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  let result = "";
+  for (let i = 0; i < 6; i++) {
+    result += alphaNum.charAt(Math.floor(Math.random() * alphaNum.length));
+  }
+  return result;
+};
+
 // app.get("/", (req, res) => {
 //   res.send("Hello!");
 // });
@@ -30,30 +39,26 @@ app.get("/urls/new", (req, res) => {
 
 app.post("/urls", (req, res) => {
   const { longURL } = req.body;
-  const randomID = generateRandomStr();
-  urlDatabase[randomID] = longURL;
-  console.log(urlDatabase);
-  res.send("Ok");
+  const id = generateRandomStr();
+  urlDatabase[id] = longURL;
+  // console.log(urlDatabase);
+  res.redirect(`/urls/${id}`);
 });
-
-const generateRandomStr = function() {
-  const alphaNum = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  let result = "";
-  for (let i = 0; i < 6; i++) {
-    result += alphaNum.charAt(Math.floor(Math.random() * alphaNum.length));
-  }
-  return result;
-};
 
 // app.get("/urls/:id", (req, res) => {
 //   res.send(req.params);
 // });
 
 app.get("/urls/:id", (req, res) => {
-  const templateVars = { id: req.params.id, longURL: urlDatabase.id };
+  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id] };
+  console.log(templateVars.longURL);
   res.render("urls_show", templateVars);
 });
 
+app.get("/u/:id", (req, res) => {
+  const longURL = urlDatabase[req.params.id];
+  res.redirect(longURL);
+});
 
 // app.get("/hello", (req, res) => {
 //   res.send("<html><body>Hello <b>World<b></body></html>\n");
