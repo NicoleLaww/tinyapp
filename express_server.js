@@ -50,13 +50,22 @@ app.post("/urls/:id/delete", (req, res) => {
   res.redirect("/urls");
 });
 
+app.post("/urls/:id/update", (req, res) => {
+  const { urlUpdate } = req.body;
+  const idToUpdate = req.params.id;
+  if (urlDatabase[idToUpdate]) {
+    urlDatabase[idToUpdate] = urlUpdate;
+  }
+  res.redirect(`/urls/${idToUpdate}`);
+});
+
 // app.get("/urls/:id", (req, res) => {
 //   res.send(req.params);
 // });
 
 app.get("/urls/:id", (req, res) => {
   const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id] };
-  console.log(templateVars.longURL);
+  // console.log(templateVars.longURL);
   res.render("urls_show", templateVars);
 });
 
