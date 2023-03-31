@@ -50,13 +50,20 @@ app.post("/urls/:id/delete", (req, res) => {
   res.redirect("/urls");
 });
 
-app.post("/urls/:id/", (req, res) => {
+app.post("/urls/:id", (req, res) => {
   const { urlUpdate } = req.body;
   const idToUpdate = req.params.id;
   if (urlDatabase[idToUpdate]) {
     urlDatabase[idToUpdate] = urlUpdate;
   }
   res.redirect(`/urls/${idToUpdate}`);
+});
+
+app.post("/login", (req, res) => {
+  const { username } = req.body;
+  res
+    .cookie("username", username)
+    .redirect("/urls");
 });
 
 // app.get("/urls/:id", (req, res) => {
