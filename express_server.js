@@ -38,7 +38,7 @@ const generateRandomStr = () => {
 };
 
 app.get("/urls", (req, res) => {
-  const userId = req.cookies.userId
+  const userId = req.cookies.userId;
   const user = users[userId];
   const templateVars = { urls: urlDatabase, userId, user };
   res.render("urls_index", templateVars);
@@ -74,7 +74,7 @@ app.post("/urls/:id/delete", (req, res) => {
 });
 
 app.get("/urls/:id", (req, res) => {
-  const userId = req.cookies.userId
+  const userId = req.cookies.userId;
   const user = users[userId];
   const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id], userId, user };
   // console.log(templateVars.longURL);
@@ -87,25 +87,39 @@ app.get("/u/:id", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
-  const userId = req.cookies.userId
+  const userId = req.cookies.userId;
   const user = users[userId];
   const templateVars = { userId, user };
   return res.render("urls_register", templateVars);
 });
+
+const getUserByEmail = (email) => {
+  for (const user in users) {
+    if (users[user].email === email) {
+      return true;
+    }
+  }
+  return false;
+};
 
 app.post("/register", (req, res) => {
   const { registration } = req.body;
   const userId = generateRandomStr(registration);
   const email = req.body.email.trim();
   const password = req.body.password.trim();
-  users[`${userId}`] = { id: `${userId}`, email, password};
-  console.log(users);
-  res.cookie("userId", userId);
-  res.redirect("/urls");
+  if (!email || !password) {
+    res.status(400).send("Invalid Credentials");
+  } else if (getUserByEmail(email)) {
+    res.status(400).send("Try again with another email");
+  } else {
+    users[`${userId}`] = { id: `${userId}`, email, password};
+    res.cookie("userId", userId);
+    res.redirect("/urls");
+  }
 });
 
 app.post("/login", (req, res) => {
-  const { userId } = req.body
+  const { userId } = req.body;
   res
     .cookie("userId", userId)
     .redirect("/urls");
