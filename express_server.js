@@ -96,7 +96,7 @@ app.get("/register", (req, res) => {
 const getUserByEmail = (email) => {
   for (const user in users) {
     if (users[user].email === email) {
-      return true;
+      return users[user];
     }
   }
   return false;
@@ -126,16 +126,29 @@ app.get("/login", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  const { userId } = req.body;
-  res
-    .cookie("userId", userId)
-    .redirect("/urls");
+  const email = req.body.email.trim();
+  const password = req.body.password.trim();
+  if (!email || !password) {
+    res.status(400).send("You have left the fields empty. Please try again.");
+  }
+  if (!getUserByEmail(email)) {
+    res.status(403).send("Try another email!");
+  } else if (getUserByEmail(email)) {
+    if (password !== getUserByEmail(email).password) {
+      res.status(403).send("Invalid Credentials");
+    } else {
+      const userId = getUserByEmail(email).id;
+      res
+        .cookie("userId", userId)
+        .redirect("/urls");
+    }
+  }
 });
 
 app.post("/logout", (req, res) => {
   res
     .clearCookie("userId")
-    .redirect("/urls");
+    .redirect("/login");
 });
 
 app.listen(PORT, () => {

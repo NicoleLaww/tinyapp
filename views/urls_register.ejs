@@ -15,16 +15,16 @@
       integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS"
       crossorigin="anonymous"
     />
-    <title>Registration Page</title>
+    <title>Create Account</title>
   </head>
   <body>
     <%- include('partials/_header') %>
     <form method="POST" action="/register">
       <label>Email</label>
-      <input type="email" name="email">
+      <input type="email" name="email" placeholder="Email">
       <label>Password</label>
-      <input type="password" name="password">
-      <button type="submit" class="btn btn-primary">Submit</button>
+      <input type="password" name="password" placeholder="Password">
+      <button type="submit" class="btn btn-primary">Register</button>
     </form>
     
     <!-- Bootstrap JS -->
