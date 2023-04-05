@@ -7,8 +7,11 @@ const app = express();
 app.set("view engine", "ejs");
 
 //middleware
+
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
+
+//databases
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -28,6 +31,8 @@ const users = {
   }
 };
 
+//helper functions
+
 const generateRandomStr = () => {
   const alphaNum = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
   let result = "";
@@ -37,18 +42,45 @@ const generateRandomStr = () => {
   return result;
 };
 
+const getUserByEmail = (email) => {
+  for (const user in users) {
+    if (users[user].email === email) {
+      return users[user];
+    }
+  }
+  return false;
+};
+
+const getIdFromDB = (shorturl) => {
+  for (const id in urlDatabase) {
+    if (shorturl === id) {
+      return true;
+    }
+  }
+  return false;
+};
+
+
 app.get("/urls", (req, res) => {
   const userId = req.cookies.userId;
   const user = users[userId];
   const templateVars = { urls: urlDatabase, userId, user };
-  res.render("urls_index", templateVars);
+  if (user || !user) {
+    res.render("urls_index", templateVars);
+  }
 });
 
 app.post("/urls", (req, res) => {
+  const userId = req.cookies.userId;
+  const user = users[userId];
+  const templateVars = { userId, user};
   const { longURL } = req.body;
   const id = generateRandomStr();
+  if (!user) {
+    res.render("urls_show.ejs", templateVars);
+    return;
+  }
   urlDatabase[id] = longURL;
-  // console.log(urlDatabase);
   res.redirect(`/urls/${id}`);
 });
 
@@ -56,6 +88,10 @@ app.get("/urls/new", (req, res) => {
   const userId = req.cookies.userId;
   const user = users[userId];
   const templateVars = { userId, user};
+  if (!userId) {
+    res.redirect("/login");
+    return;
+  }
   res.render("urls_new", templateVars);
 });
 
@@ -77,12 +113,21 @@ app.get("/urls/:id", (req, res) => {
   const userId = req.cookies.userId;
   const user = users[userId];
   const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id], userId, user };
-  // console.log(templateVars.longURL);
-  res.render("urls_show", templateVars);
+  if (user || !user) {
+    if (!getIdFromDB(req.params.id)) {
+      res.status(404).send("Doesn't exist");
+      return;
+    }
+    res.render("urls_show", templateVars);
+  }
 });
 
 app.get("/u/:id", (req, res) => {
   const longURL = urlDatabase[req.params.id];
+  if (!getIdFromDB(req.params.id)) {
+    res.status(404).send("Doesn't exist");
+    return;
+  }
   res.redirect(longURL);
 });
 
@@ -90,17 +135,12 @@ app.get("/register", (req, res) => {
   const userId = req.cookies.userId;
   const user = users[userId];
   const templateVars = { userId, user };
-  return res.render("urls_register", templateVars);
-});
-
-const getUserByEmail = (email) => {
-  for (const user in users) {
-    if (users[user].email === email) {
-      return users[user];
-    }
+  if (user) {
+    res.redirect("/urls");
+    return;
   }
-  return false;
-};
+  res.render("urls_register", templateVars);
+});
 
 app.post("/register", (req, res) => {
   const { registration } = req.body;
@@ -122,7 +162,11 @@ app.get("/login", (req, res) => {
   const userId = req.cookies.userId;
   const user = users[userId];
   const templateVars = {userId, user};
-  res.render("urls_login", templateVars);
+  if (!user) {
+    res.render("urls_login", templateVars);
+    return;
+  }
+  res.redirect("/urls");
 });
 
 app.post("/login", (req, res) => {
@@ -132,7 +176,7 @@ app.post("/login", (req, res) => {
     res.status(400).send("You have left the fields empty. Please try again.");
   }
   if (!getUserByEmail(email)) {
-    res.status(403).send("Try another email!");
+    res.status(403).send("You do not have an account");
   } else if (getUserByEmail(email)) {
     if (password !== getUserByEmail(email).password) {
       res.status(403).send("Invalid Credentials");

@@ -22,14 +22,18 @@
         </p>
       </div>
       <div> 
-            <h5>Edit</h5>
+        <% if  (!user) { %>
+          <p>You do not have permission to edit links! Please <a href="http://localhost:8080/login" >log in</a> or <a href="http://localhost:8080/register"> register </a>for an account.</p>
+        <% } else if (user) { %>
+          <h5>Edit</h5>
               <form method="POST" action="/urls/<%= id %>/">
                 <label>Update URL:</label>
                 <input type="text" id="urlUpdate" name="urlUpdate" placeholder="http://">
                 <button type="submit" class="btn btn-primary">Submit</button>
               </form>
-            </div>
-      <div class="card-footer text-muted"></div>
+        <% } %>
+      </div>
+    <div class="card-footer text-muted"></div>
     </div>
     <!-- Bootstrap JS -->
     <script
