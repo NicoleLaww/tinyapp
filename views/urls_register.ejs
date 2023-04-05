@@ -15,18 +15,33 @@
       integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS"
       crossorigin="anonymous"
     />
+
     <title>Create Account</title>
   </head>
+  
   <body>
     <%- include('partials/_header') %>
+
+  <main style="margin: 1em;">
+    <h3>Register</h3>
     <form method="POST" action="/register">
-      <label>Email</label>
+     <div>
+      <label>Email: </label>
+    </div>
+    <div>
       <input type="email" name="email" placeholder="Email">
-      <label>Password</label>
+    </div>
+    <div>
+      <label>Password: </label>
+    </div>
+    <div>
       <input type="password" name="password" placeholder="Password">
-      <button type="submit" class="btn btn-primary">Register</button>
+    </div>
+    <div>
+        <button type="submit" class="btn btn-primary">Register</button>
+    </div>
     </form>
-    
+  </main>
     <!-- Bootstrap JS -->
     <script
       src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
