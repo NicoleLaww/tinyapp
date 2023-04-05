@@ -53,7 +53,7 @@ app.post("/urls", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  const userId = req.cookies.userId
+  const userId = req.cookies.userId;
   const user = users[userId];
   const templateVars = { userId, user};
   res.render("urls_new", templateVars);
@@ -116,6 +116,13 @@ app.post("/register", (req, res) => {
     res.cookie("userId", userId);
     res.redirect("/urls");
   }
+});
+
+app.get("/login", (req, res) => {
+  const userId = req.cookies.userId;
+  const user = users[userId];
+  const templateVars = {userId, user};
+  res.render("urls_login", templateVars);
 });
 
 app.post("/login", (req, res) => {

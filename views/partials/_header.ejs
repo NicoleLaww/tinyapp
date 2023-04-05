@@ -10,27 +10,33 @@
       aria-expanded="false"
       aria-label="Toggle navigation"
     >
-      <span class="navbar-toggler-icon"></span>
+    <span class="navbar-toggler-icon"></span>
     </button>
+    
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
       <div class="navbar-nav">
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
-        <a class="nav-item nav-link" href="/register">Register</a>
-      </div>
-      <% if (user) { %>
-         <p> Logged in as: <%= user.email %> </p>
-         <form method = "POST" action="/logout">
-          <button type="submit" class="btn btn-primary">Log out</button>
-         </form>
-      <% } else { %>
-      <form method = "POST" action="/login">
-          <input type="text" id="userId" name="userId" placeholder="User ID">
-          <button type="submit" class="btn btn-primary">Log In</button>
-        </form>
-      <% } %>
       </div>
     </div>
+
+    <div>
+           <% if (!user) { %>
+          <form method = "POST" action="/login">
+          <a href="/login" class="btn btn-primary">Log In</a> 
+          </form>
+      <% } else if (user) { %>
+          <p> Logged in as: <%= user.email %> </p>
+          <form method = "POST" action="/logout">
+          <button type="submit" class="btn btn-primary">Log out</button>
+          </form>
+      <% } %>
+    </div>
+
+    <div>
+      <a class="nav-item nav-link" href="/register">Register</a>
+    </div>
+    
   </nav>
 </header>
 
