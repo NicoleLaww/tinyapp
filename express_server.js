@@ -2,6 +2,7 @@
 
 const express = require("express");
 const cookieParser = require("cookie-parser");
+const bcrypt = require("bcryptjs");
 const app = express();
 const PORT = 8080;
 
@@ -212,13 +213,14 @@ app.post("/register", (req, res) => {
   const userId = generateRandomStr();
   const email = req.body.email.trim();
   const password = req.body.password.trim();
+  const hashedPassword = bcrypt.hashSync(password, 10);
   if (!email || !password) {//empty fields
     return res.status(400).send("Empty Field");
   }
   if (getUserByEmail(email)) {//already registered in system
     return res.status(400).send("Try another email");
   } else {//create new user
-    users[`${userId}`] = { id: `${userId}`, email, password};
+    users[`${userId}`] = { id: `${userId}`, email, password: hashedPassword};
     return res
       .cookie("userId", userId)
       .redirect("/urls");
@@ -248,7 +250,7 @@ app.post("/login", (req, res) => {
     res.status(401).send("Unauthorized. You do not have an account!");
   }
   if (user) {
-    if (password !== user.password) {//check if password matches
+    if (!bcrypt.compareSync(password, user.password)) {//check if password matches, if doesn't
       return res.status(403).send("Invalid Credentials");
     } else {//if everything is good
       const userId = user.id;
