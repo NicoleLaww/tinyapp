@@ -19,6 +19,15 @@ app.use(cookieSession({
 
 //ROUTES
 //Load url homepage
+app.get("/", (req, res) => {
+  const userId = req.session.userId;
+  const user = users[userId];
+  if (!user) {
+    return res.redirect("/login");
+  }
+  return res.redirect("/urls");
+});
+
 app.get("/urls", (req, res) => {
   const userId = req.session.userId;
   const user = users[userId];
@@ -57,7 +66,9 @@ app.get("/urls/:id", (req, res) => {
   const userSpecificUrls = urlsForUser(userId);
   const templateVars = { id, urls: userSpecificUrls, userId, user };
   if (user) {
+    console.log(user);
     if (!userSpecificUrls[id]) {//if urls don't belong to user
+      console.log(userSpecificUrls[id]);
       return res.status(401).send("Do not have proper permissions");
     } else {
       return res.render("urls_show", templateVars);
@@ -87,9 +98,8 @@ app.post("/urls", (req, res) => {
   }
   const id = generateRandomStr();
   urlDatabase[id] = {longURL, userId };
-  const templateVars = { urlDatabase, userId, user, longURL, id};
   if (!user) {//if not a user or not logged in
-    return res.render("urls_show.ejs", templateVars);
+    return res.status(401).send("Unauthorized");
   }
   return res.redirect(`/urls/${id}`);
 });
@@ -123,7 +133,7 @@ app.post("/urls/:id", (req, res) => {
   if (urlDatabase[idToUpdate]) {//if the short id exists in users' database
     urlDatabase[idToUpdate].longURL = urlUpdate;
   }
-  return res.redirect(`/urls/${idToUpdate}`);
+  return res.redirect(`/urls`);
 });
 
 //Delete url

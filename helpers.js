@@ -39,4 +39,4 @@ const getUserByEmail = (email, database) => {
   return false;
 };
 
-module.exports = { getUserByEmail, urlsForUser, getIdFromDB, generateRandomStr };
+module.exports = {getUserByEmail, urlsForUser, getIdFromDB, generateRandomStr};
