@@ -1,86 +1,25 @@
 //REQUIREMENTS
 const express = require("express");
-// const cookieParser = require("cookie-parser");
 const cookieSession = require('cookie-session');
 const bcrypt = require("bcryptjs");
-const getUserByEmail = require("./helpers.js");
+const {getUserByEmail, urlsForUser, getIdFromDB, generateRandomStr} = require("./helpers.js");
+const {urlDatabase, users} = require("./databases.js");
 
 const app = express();
 const PORT = 8080;
 
 //MIDDLEWARE
-
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
-// app.use(cookieParser());
 app.use(cookieSession({
   name: "user-session",
   keys: ["tiny", "app"],
   maxAge: 5 * 60 * 60 * 1000
 }));
 
-//DATABASES
-
-const urlDatabase = {
-  b6UTxQ: {
-    longURL: "https://www.tsn.ca",
-    userId: "aJ48lW",
-  },
-  i3BoGr: {
-    longURL: "https://www.google.ca",
-    userId: "aJ48lW",
-  },
-};
-
-const users = {
-  userRandomID: {
-    id: "userRandomID",
-    email: "user@example.com",
-    password: "purple-monkey-dinosaur",
-  },
-  user2RandomID: {
-    id: "user2RandomID",
-    email: "user2@example.com",
-    password: "dishwasher-funk",
-  }
-};
-
-//HELPER FUNCTIONS
-
-const generateRandomStr = () => {
-  const alphaNum = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  let result = "";
-  for (let i = 0; i < 6; i++) {
-    result += alphaNum.charAt(Math.floor(Math.random() * alphaNum.length));
-  }
-  return result;
-};
-
-const getIdFromDB = (shorturl) => {
-  for (const id in urlDatabase) {
-    if (shorturl === id) {
-      return true;
-    }
-  }
-  return false;
-};
-
-const urlsForUser = (id) => {
-  let customUrls = {};
-  for (const shortUrl in urlDatabase) {
-    const identifier = urlDatabase[shortUrl];
-    if (identifier.userId === id) {
-      customUrls[shortUrl] = urlDatabase[shortUrl];
-    }
-  }
-  return customUrls;
-};
-
 //ROUTES
-
 //Load url homepage
 app.get("/urls", (req, res) => {
-  // const userId = req.cookies.userId;
   const userId = req.session.userId;
   const user = users[userId];
   if (!user) {
@@ -95,7 +34,6 @@ app.get("/urls", (req, res) => {
 
 //Load create new url page, different for logged in versus not logged in
 app.get("/urls/new", (req, res) => {
-  // const userId = req.cookies.userId;
   const userId = req.session.userId;
   const user = users[userId];
   const templateVars = { userId, user};
@@ -107,11 +45,9 @@ app.get("/urls/new", (req, res) => {
 
 //Load edit page for existing urls
 app.get("/urls/:id", (req, res) => {
-  // const userId = req.cookies.userId;
   const userId = req.session.userId;
   const user = users[userId];
   const id = req.params.id;
-  // const longURL = urlDatabase[req.params.id].longURL;
   if (!user) {//if not a user
     return res.status(401).send("Please log in");
   }
@@ -131,7 +67,6 @@ app.get("/urls/:id", (req, res) => {
 
 //Register Page
 app.get("/register", (req, res) => {
-  // const userId = req.cookies.userId;
   const userId = req.session.userId;
   const user = users[userId];
   const templateVars = { userId, user };
@@ -144,7 +79,6 @@ app.get("/register", (req, res) => {
 
 //Create new url
 app.post("/urls", (req, res) => {
-  // const userId = req.cookies.userId;
   const userId = req.session.userId;
   const user = users[userId];
   const { longURL } = req.body;
@@ -177,7 +111,6 @@ app.post("/urls/:id", (req, res) => {
   if (!urlDatabase[idToUpdate]) {//id doesn't exist
     return res.status(404).send("Not Found");
   }
-  // const userId = req.cookies.userId;
   const userId = req.session.userId;
   const user = users[userId];
   if (!user) {//not a user or not logged in
@@ -199,7 +132,6 @@ app.post("/urls/:id/delete", (req, res) => {
   if (!getIdFromDB(id)) {//if id doesn't exist
     return res.status(404).send("Not Found");
   }
-  // const userId = req.cookies.userId;
   const userId = req.session.userId;
   const user = users[userId];
   if (!user) {//if user is not logged in or registered
@@ -229,14 +161,11 @@ app.post("/register", (req, res) => {
     users[`${userId}`] = { id: `${userId}`, email, password: hashedPassword};
     req.session.userId = userId;
     return res.redirect("/urls");
-    // res.cookie("userId", userId)
-     
   }
 });
 
 //Load login page
 app.get("/login", (req, res) => {
-  // const userId = req.cookies.userId;
   const userId = req.session.userId;
   const user = users[userId];
   const templateVars = {userId, user};
@@ -265,7 +194,6 @@ app.post("/login", (req, res) => {
     } else {//if everything is good
       req.session.userId = userId;
       return res.redirect("/urls");
-      // .cookie("userId", userId)
     }
   }
 });
@@ -274,12 +202,9 @@ app.post("/login", (req, res) => {
 app.post("/logout", (req, res) => {
   req.session = null;
   return res.redirect("/login");
-  // .clearCookie("userId")
-    
 });
 
 //LISTENER
-
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
