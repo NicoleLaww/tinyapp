@@ -1,9 +1,10 @@
 //REQUIREMENTS
-
 const express = require("express");
 // const cookieParser = require("cookie-parser");
 const cookieSession = require('cookie-session');
 const bcrypt = require("bcryptjs");
+const getUserByEmail = require("./helpers.js");
+
 const app = express();
 const PORT = 8080;
 
@@ -53,15 +54,6 @@ const generateRandomStr = () => {
     result += alphaNum.charAt(Math.floor(Math.random() * alphaNum.length));
   }
   return result;
-};
-
-const getUserByEmail = (email) => {
-  for (const user in users) {
-    if (users[user].email === email) {
-      return users[user];
-    }
-  }
-  return false;
 };
 
 const getIdFromDB = (shorturl) => {
@@ -227,10 +219,11 @@ app.post("/register", (req, res) => {
   const email = req.body.email.trim();
   const password = req.body.password.trim();
   const hashedPassword = bcrypt.hashSync(password, 10);
+  const usersDb = users;
   if (!email || !password) {//empty fields
     return res.status(400).send("Empty Field");
   }
-  if (getUserByEmail(email)) {//already registered in system
+  if (getUserByEmail(email, usersDb)) {//already registered in system
     return res.status(400).send("Try another email");
   } else {//create new user
     users[`${userId}`] = { id: `${userId}`, email, password: hashedPassword};
@@ -257,7 +250,8 @@ app.get("/login", (req, res) => {
 app.post("/login", (req, res) => {
   const email = req.body.email.trim();
   const password = req.body.password.trim();
-  const user = getUserByEmail(email);
+  const usersDb = users;
+  const user = getUserByEmail(email, usersDb);
   const userId = user.id;
   if (!email || !password) {//check if fields are empty
     res.status(400).send("Empty Field");
